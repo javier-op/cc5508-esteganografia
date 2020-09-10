@@ -13,3 +13,6 @@ def imread(filename, as_gray = False):
     if image.dtype == np.float64 :
         image = utils.to_uint8(image)
     return image
+
+def imsave(filename, image):
+    skio.imsave(filename, image)

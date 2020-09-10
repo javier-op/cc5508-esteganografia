@@ -2,11 +2,10 @@ import argparse
 import matplotlib.pyplot as plt
 import numpy as np
 import pai_io
-import sys
 
-def hide_image(image_A, image_B, bits_len):
-    image_A = (image_A >> bits_len) << bits_len
-    image_B = image_B >> (8 - bits_len)
+def hide_image(image_A, image_B, bits_hidden):
+    image_A = (image_A >> bits_hidden) << bits_hidden
+    image_B = image_B >> (8 - bits_hidden)
     return image_A | image_B
 
 def match_images_dimensions(image_A, image_B):
@@ -22,11 +21,11 @@ def match_images_dimensions(image_A, image_B):
     return image_A, image_B
 
 def set_bits_hidden_value(image, bits_hidden):
-    if len(output.shape) == 2:
-        output[0][0] = bits_hidden
+    if len(image.shape) == 2:
+        image[0][0] = bits_hidden
     else:
-        output[0][0][0] = bits_hidden
-    return output
+        image[0][0][0] = bits_hidden
+    return image
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Hide an image inside another.')
@@ -39,6 +38,7 @@ if __name__ == '__main__':
     image_A, image_B = match_images_dimensions(image_A, image_B)
     output = hide_image(image_A, image_B, args.b)
     output = set_bits_hidden_value(output, args.b)
+    pai_io.imsave('output.png', output)
     plt.imshow(output)
     plt.axis('off')
     plt.show()
