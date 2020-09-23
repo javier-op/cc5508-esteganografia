@@ -20,6 +20,10 @@ def match_images_dimensions(image_A, image_B):
     image_B = template
     return image_A, image_B
 
+def get_max_bit_size(image):
+    max_val = np.amax(image)
+    return np.ceil(np.log2(max_val+1))
+
 def set_bits_hidden_value(image, bits_hidden):
     if len(image.shape) == 2:
         image[0][0] = bits_hidden
@@ -31,13 +35,19 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Hide an image inside another.')
     parser.add_argument('-imageA', type=str, help='Image that hides another', required=True)
     parser.add_argument('-imageB', type=str, help='Image that is hidden', required=True)
-    parser.add_argument('-b', type=np.uint8, help='Amount of bits to hide', required=True)
+    parser.add_argument('-b', type=np.uint8, help='Amount of bits to hide')
     args = parser.parse_args()
     image_A = pai_io.imread(args.imageA)
     image_B = pai_io.imread(args.imageB)
     image_A, image_B = match_images_dimensions(image_A, image_B)
-    output = hide_image(image_A, image_B, args.b)
-    output = set_bits_hidden_value(output, args.b)
+    bits_to_hide = args.b
+    if bits_to_hide is None:
+        max_capacity = get_max_bit_size(image_A) / 3.0
+        bits_to_hide = get_max_bit_size(image_B)
+        if bits_to_hide > max_capacity:
+            raise ValueError("imageB size exceeds imageA's capacity to hide")
+    output = hide_image(image_A, image_B, bits_to_hide)
+    output = set_bits_hidden_value(output, bits_to_hide)
     pai_io.imsave('output.png', output)
     plt.imshow(output)
     plt.axis('off')
