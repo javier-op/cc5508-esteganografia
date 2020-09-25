@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pai_io
 
-def hide_image(image_A, image_B, bits_hidden):
+def hide_image(image_A, image_B, bits_hidden, image_B_disp):
     image_A = (image_A >> bits_hidden) << bits_hidden
-    image_B = image_B >> (8 - bits_hidden)
+    image_B = image_B >> image_B_disp
     return image_A | image_B
 
 def match_images_dimensions(image_A, image_B):
@@ -22,7 +22,7 @@ def match_images_dimensions(image_A, image_B):
 
 def get_max_bit_size(image):
     max_val = np.amax(image)
-    return np.ceil(np.log2(max_val+1))
+    return int(np.ceil(np.log2(max_val+1)))
 
 def set_bits_hidden_value(image, bits_hidden):
     if len(image.shape) == 2:
@@ -40,15 +40,21 @@ if __name__ == '__main__':
     image_A = pai_io.imread(args.imageA)
     image_B = pai_io.imread(args.imageB)
     image_A, image_B = match_images_dimensions(image_A, image_B)
+    output = None
     bits_to_hide = args.b
     if bits_to_hide is None:
         max_capacity = get_max_bit_size(image_A) / 3.0
         bits_to_hide = get_max_bit_size(image_B)
         if bits_to_hide > max_capacity:
             raise ValueError("imageB size exceeds imageA's capacity to hide")
-    output = hide_image(image_A, image_B, bits_to_hide)
+        output = hide_image(image_A, image_B, bits_to_hide, 0)
+    else:
+        max_b_size = get_max_bit_size(image_B)
+        if bits_to_hide > max_b_size:
+            raise ValueError("b parameter larger than imageB's most significant bit")
+        output = hide_image(image_A, image_B, bits_to_hide, max_b_size-bits_to_hide)
     output = set_bits_hidden_value(output, bits_to_hide)
-    pai_io.imsave('output.png', output)
+    pai_io.imsave('hidden.png', output)
     plt.imshow(output)
     plt.axis('off')
     plt.show()
