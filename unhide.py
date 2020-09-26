@@ -17,6 +17,7 @@ if __name__ == '__main__':
     input_image = pai_io.imread(sys.argv[1])
     bits_hidden = get_bits_hidden_value(input_image)
     output = unhide_image(input_image, bits_hidden)
+    pai_io.imsave('unhidden.png', output)
     plt.imshow(output)
     plt.axis('off')
     plt.show()
