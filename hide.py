@@ -43,7 +43,7 @@ if __name__ == '__main__':
     output = None
     bits_to_hide = args.b
     if bits_to_hide is None:
-        max_capacity = int(np.ceil(get_max_bit_size(image_A) * 8.0 / 3.0))
+        max_capacity = int(np.ceil(get_max_bit_size(image_A) * 3.0 / 8.0))
         bits_to_hide = get_max_bit_size(image_B)
         if bits_to_hide > max_capacity:
             raise ValueError("imageB size exceeds imageA's capacity to hide")
